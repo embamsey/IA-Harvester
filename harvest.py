@@ -24,6 +24,7 @@ import json
 import os
 import os.path
 import postgresql
+import re
 import time
 import urllib.parse
 import urllib.request
@@ -41,6 +42,8 @@ def get_fulltext(did, ocr):
     ia = "http://archive.org/download/%s/%s" % (did, ocr)
     try:
         ft = urllib.request.urlopen(ia).read().decode('utf-8')
+        # Repair hyphenation at column boundaries
+        ft = re.sub(r'-\s*$\n', '', ocr, flags=re.MULTILINE)
         return ft
     except Exception as exc:
         print("ERR: Failed to get full-text for %s" % (did))
@@ -139,7 +142,7 @@ def get_image(d):
 
 def get_collection(c):
     """Identify all of the items in a given Internet Archive collection"""
-    page = 0
+    page = 1
     rows = 100
     while True:
         res = get_page(c, page, rows)
@@ -162,7 +165,7 @@ def get_page(c, page, rows):
     for docid in res['response']['docs']:
         time.sleep(1)
         d = get_details(docid)
-        if d is None:
+        if not d:
             next
         get_image(d)
         load_db(c, d)
