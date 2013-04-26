@@ -1,0 +1,121 @@
+{
+   "responseHeader" : {
+      "params" : {
+         "fl" : "identifier",
+         "wt" : "json",
+         "rows" : "1000",
+         "indent" : "",
+         "json.wrf" : "",
+         "q" : "collection:laurentianuniversitylambda",
+         "qin" : "collection:laurentianuniversitylambda",
+         "start" : "1000"
+      },
+      "status" : 0,
+      "QTime" : 1
+   },
+   "response" : {
+      "numFound" : 1033,
+      "docs" : [
+         {
+            "identifier" : "LambdaVol.26No.11"
+         },
+         {
+            "identifier" : "LambdaVol.26No.10"
+         },
+         {
+            "identifier" : "LambdaVol.28No.1"
+         },
+         {
+            "identifier" : "LambdaVol.29No.16"
+         },
+         {
+            "identifier" : "LamdaVol.29No.14"
+         },
+         {
+            "identifier" : "LambdaVol.30No.11"
+         },
+         {
+            "identifier" : "LambdaVol.30No.15"
+         },
+         {
+            "identifier" : "LambdaVol.27No.15"
+         },
+         {
+            "identifier" : "LambdaVol.27No.6"
+         },
+         {
+            "identifier" : "LambdaVol.22No.22"
+         },
+         {
+            "identifier" : "LambdaVol.23No.22"
+         },
+         {
+            "identifier" : "LambdaVol.34No.3"
+         },
+         {
+            "identifier" : "LambdaVol.27No.7-sports"
+         },
+         {
+            "identifier" : "LambdaVol.28No.3_259"
+         },
+         {
+            "identifier" : "LambdaVol.25No.5_710"
+         },
+         {
+            "identifier" : "LambdaVol.28No.22"
+         },
+         {
+            "identifier" : "LambdaVol.27No.18"
+         },
+         {
+            "identifier" : "LambdaVol.24No.4"
+         },
+         {
+            "identifier" : "LambdaVol.26No.4"
+         },
+         {
+            "identifier" : "LambdaVol.23No.12"
+         },
+         {
+            "identifier" : "LambdaVol.22No.17"
+         },
+         {
+            "identifier" : "LambdaVol.24No.2"
+         },
+         {
+            "identifier" : "LambdaVol.30No.6"
+         },
+         {
+            "identifier" : "LambdaVol.29No.23"
+         },
+         {
+            "identifier" : "LambdaVol.27No.19"
+         },
+         {
+            "identifier" : "LambdaVol.24No.10"
+         },
+         {
+            "identifier" : "LambdaVol.25No.6_118"
+         },
+         {
+            "identifier" : "LambdaVol.24No.12"
+         },
+         {
+            "identifier" : "LambdaVol.29No.2"
+         },
+         {
+            "identifier" : "LambdaVol.22No.10"
+         },
+         {
+            "identifier" : "LambdaVol.22No.6"
+         },
+         {
+            "identifier" : "LambdaVol.22No.4"
+         },
+         {
+            "identifier" : "LambdaVol.29No.21"
+         }
+      ],
+      "start" : 1000
+   }
+}
