@@ -40,28 +40,47 @@ db = postgresql.open(host=db_host, database=db_name, user=db_user)
 def get_fulltext(did, ocr):
     """Grab the OCRed text for a given Internet Archive collection item"""
     ia = "http://archive.org/download/%s/%s" % (did, ocr)
-    try:
-        ft = urllib.request.urlopen(ia).read().decode('utf-8')
-        # Repair hyphenation at column boundaries
-        ft = re.sub(r'-\s*$\n', '', ocr, flags=re.MULTILINE)
-        return ft
-    except Exception as exc:
-        print("ERR: Failed to get full-text for %s" % (did))
 
-    return ''
+    fname = os.path.join(datadir, 'fulltext/', did + '.json')
+    if os.access(fname, os.R_OK):
+        ft = open(fname, "rb").read()
+    else:
+        try:
+            ft = urllib.request.urlopen(ia).read()
+            f = open(fname, "wb")
+        except Exception as exc:
+            print("ERR: Failed to get full-text for %s" % (did))
+            return ''
+        else:
+            with f:
+                f.write(ft)
+
+    # Repair hyphenation at column boundaries
+    ft = re.sub(r'-\s*$\n', '', ft.decode('utf-8'), flags=re.MULTILINE)
+    return ft
 
 def get_details(docid):
     """Grab the metadata for a given Internet Archive collection item"""
     deets = {'id': docid['identifier']}
     didu = "http://archive.org/details/%s?output=json" % (deets['id'])
     dts = bytearray()
-    try:
-        dts = urllib.request.urlopen(didu)
-    except Exception as e:
-        print("ERR: Could not fetch metadata for %s" % deets['id'])
-        return None
 
-    dts_res = json.loads(dts.read().decode('utf-8'), parse_int=True)
+    fname = os.path.join(datadir, 'details/', deets['id'] + '.json')
+    if os.access(fname, os.R_OK):
+        dts = open(fname, "rb").read()
+    else:
+        time.sleep(1)
+        try:
+            dts = urllib.request.urlopen(didu).read()
+            f = open(fname, "wb")
+        except Exception as e:
+            print("ERR: Could not fetch metadata for %s" % deets['id'])
+            return None
+        else:
+            with f:
+                f.write(dts)
+
+    dts_res = json.loads(dts.decode('utf-8'), parse_int=True)
 
     # grab the following details for each :
     # image, title, date, year
@@ -128,7 +147,7 @@ def get_image(d):
         return
 
     print(d['image'])
-    fname = os.path.join(datadir, d['id'] + '.gif')
+    fname = os.path.join(datadir, 'images/', d['id'] + '.gif')
     if os.access(fname, os.R_OK):
         return
     try:
@@ -163,7 +182,6 @@ def get_page(c, page, rows):
     ids = urllib.request.urlopen("http://archive.org/advancedsearch.php?%s" % params)
     res = json.loads(ids.read().decode('utf-8'))
     for docid in res['response']['docs']:
-        time.sleep(1)
         d = get_details(docid)
         if not d:
             next
@@ -172,6 +190,9 @@ def get_page(c, page, rows):
     return res
 
 os.makedirs(datadir, exist_ok=True)
+os.makedirs(os.path.join(datadir, 'details'), exist_ok=True)
+os.makedirs(os.path.join(datadir, 'fulltext'), exist_ok=True)
+os.makedirs(os.path.join(datadir, 'images'), exist_ok=True)
 init_db()
 for c in collections:
     get_collection(c)
