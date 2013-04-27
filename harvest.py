@@ -29,60 +29,60 @@ import time
 import urllib.parse
 import urllib.request
 
-datadir = './data'
-collections = ['laurentianuniversitylambda']
-db_name = 'newspappy'
-db_host = 'localhost'
-db_user = 'denials'
+DATADIR = './data'
+COLLECTIONS = ['laurentianuniversitylambda']
+DB_NAME = 'newspappy'
+DB_HOST = 'localhost'
+DB_USER = 'denials'
 
-db = postgresql.open(host=db_host, database=db_name, user=db_user)
+DB = postgresql.open(host=DB_HOST, database=DB_NAME, user=DB_USER)
 
 def get_fulltext(did, ocr):
     """Grab the OCRed text for a given Internet Archive collection item"""
-    ia = "http://archive.org/download/%s/%s" % (did, ocr)
+    ocr_url = "http://archive.org/download/%s/%s" % (did, ocr)
 
-    fname = os.path.join(datadir, 'fulltext/', did + '.json')
+    fname = os.path.join(DATADIR, 'fulltext/', did + '.json')
     if os.access(fname, os.R_OK):
-        ft = open(fname, "rb").read()
+        contents = open(fname, "rb").read()
     else:
         try:
-            ft = urllib.request.urlopen(ia).read()
-            f = open(fname, "wb")
+            contents = urllib.request.urlopen(ocr_url).read()
+            out = open(fname, "wb")
         except Exception as exc:
-            print("ERR: Failed to get full-text for %s" % (did))
+            print("ERR: Failed to get full-text for %s : %s" % (did, exc))
             return ''
         else:
-            with f:
-                f.write(ft)
+            with out:
+                out.write(contents)
 
     # Repair hyphenation at column boundaries
-    ft = re.sub(r'-\s*$\n', '', ft.decode('utf-8'), flags=re.MULTILINE)
-    return ft
+    contents = re.sub(r'-\s*$\n', '', contents.decode('utf-8'), flags=re.MULTILINE)
+    return contents
 
-def get_details(docid):
+def get_metadata(docid):
     """Grab the metadata for a given Internet Archive collection item"""
-    deets = {'id': docid['identifier']}
-    didu = "http://archive.org/details/%s?output=json" % (deets['id'])
+    deets = {'id': docid}
+    didu = "http://archive.org/details/%s?output=json" % (docid)
     dts = bytearray()
 
-    fname = os.path.join(datadir, 'details/', deets['id'] + '.json')
+    fname = os.path.join(DATADIR, 'details/', docid + '.json')
     if os.access(fname, os.R_OK):
         dts = open(fname, "rb").read()
     else:
         time.sleep(1)
         try:
             dts = urllib.request.urlopen(didu).read()
-            f = open(fname, "wb")
-        except Exception as e:
-            print("ERR: Could not fetch metadata for %s" % deets['id'])
+            out = open(fname, "wb")
+        except Exception as exc:
+            print("ERR: Could not fetch metadata for %s : %s" % (docid, exc))
             return None
         else:
-            with f:
-                f.write(dts)
+            with out:
+                out.write(dts)
 
     dts_res = json.loads(dts.decode('utf-8'), parse_int=True)
 
-    # grab the following details for each :
+    # grab the following metadata for each :
     # image, title, date, year
     deets['image'] = dts_res['misc']['image']
     deets['title'] = dts_res['metadata']['title'][0]
@@ -100,100 +100,112 @@ def get_details(docid):
 
     try:
         deets['date'] = datetime.datetime.strptime(raw_date, '%Y-%m-%d')
-    except ValueError as e:
-        print("ERR: %s %s" % (deets['id'], e))
+    except ValueError as exc:
+        print("ERR: %s %s" % (deets['id'], exc))
         try:
             deets['date'] = datetime.datetime.strptime(raw_date, '%Y-%m')
-        except ValueError as e:
+        except ValueError:
             deets['date'] = datetime.datetime.strptime(raw_date, '%Y')
 
-    for f in dts_res['files']:
-        if dts_res['files'][f]['format'] != 'DjVuTXT':
+    for fname in dts_res['files']:
+        if dts_res['files'][fname]['format'] != 'DjVuTXT':
             continue
-        ft = get_fulltext(deets['id'], f)
-        deets['text'] = ft
+        deets['text'] = get_fulltext(deets['id'], fname)
     return deets
 
-def load_db(c, d):
-    """Add the details to the database"""
+def load_db(collection, metadata):
+    """Add the metadata to the database"""
 
-    if 'text' not in d:
-        print("ERR: No text found for %s" % (d['id']))
+    if 'text' not in metadata:
+        print("ERR: No text found for %s" % (metadata['id']))
         return
 
-    ins = db.prepare("""
+    ins = DB.prepare("""
         INSERT INTO items(id, collection, title, image, date, year, ocr)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
     """)
-    r = ins(d['id'], c, d['title'], d['image'], d['date'], d['year'], d['text'])
+    ins(
+        metadata['id'],
+        collection,
+        metadata['title'],
+        metadata['image'],
+        metadata['date'],
+        metadata['year'],
+        metadata['text']
+    )
 
 def init_db():
     """Initialize our database"""
-    db.execute("DROP TABLE IF EXISTS items")
-    db.execute("CREATE TABLE items (id TEXT, collection TEXT, title TEXT, image TEXT, date DATE, year INT, ocr TEXT, tsv TSVECTOR)")
-    db.execute("CREATE INDEX tsv_idx ON items USING GIN(tsv)")
-    db.execute("""
+    DB.execute("DROP TABLE IF EXISTS items")
+    DB.execute("""
+        CREATE TABLE items (id TEXT, collection TEXT, title TEXT,
+        image TEXT, date DATE, year INT, ocr TEXT, tsv TSVECTOR)
+    """)
+    DB.execute("CREATE INDEX tsv_idx ON items USING GIN(tsv)")
+    DB.execute("""
         CREATE TRIGGER tsv_update BEFORE INSERT OR UPDATE ON items
         FOR EACH ROW EXECUTE PROCEDURE
         tsvector_update_trigger(tsv, 'pg_catalog.english', ocr)
     """)
 
-def get_image(d):
+def get_image(metadata):
     """Grab the thumbnail for the Internet Archive item"""
 
-    if 'image' not in d:
-        print("ERR: No image found for %s" % d['id'])
-        d['image'] = ''
+    if 'image' not in metadata:
+        print("ERR: No image found for %s" % metadata['id'])
+        metadata['image'] = ''
         return
 
-    print(d['image'])
-    fname = os.path.join(datadir, 'images/', d['id'] + '.gif')
+    print(metadata['image'])
+    fname = os.path.join(DATADIR, 'images/', metadata['id'] + '.gif')
     if os.access(fname, os.R_OK):
         return
     try:
-        r = urllib.request.urlopen(d['image']).read()
-        f = open(fname, "wb")
-    except Exception as e:
-        print("ERR: Could not fetch image %s" % (d['image']))
+        contents = urllib.request.urlopen(metadata['image']).read()
+        out = open(fname, "wb")
+    except Exception as exc:
+        print("ERR: Could not fetch image %s : %s" % (metadata['image'], exc))
     else:
-        with f:
-            f.write(r)
+        with out:
+            out.write(contents)
 
-def get_collection(c):
+def get_collection(collection):
     """Identify all of the items in a given Internet Archive collection"""
     page = 1
     rows = 100
     while True:
-        res = get_page(c, page, rows)
+        res = get_page(collection, page, rows)
         if int(res['response']['numFound']) < (rows * page):
             break
         page += 1
 
-def get_page(c, page, rows):
+def get_page(collection, page, rows):
     """Get one page of items from a given Internet Archive collection"""
     params = urllib.parse.urlencode({
-        'q': "collection:%s" % (c),
+        'q': "collection:%s" % (collection),
         'fl[]': 'identifier',
         'sort[]': 'date asc',
         'rows': rows,
         'page': page,
         'output': 'json'
     })
-    ids = urllib.request.urlopen("http://archive.org/advancedsearch.php?%s" % params)
+    ids = urllib.request.urlopen(
+        "http://archive.org/advancedsearch.php?%s" % params
+    )
     res = json.loads(ids.read().decode('utf-8'))
     for docid in res['response']['docs']:
-        d = get_details(docid)
-        if not d:
-            next
-        get_image(d)
-        load_db(c, d)
+        metadata = get_metadata(docid['identifier'])
+        if not metadata:
+            continue
+        get_image(metadata)
+        load_db(collection, metadata)
     return res
 
-os.makedirs(datadir, exist_ok=True)
-os.makedirs(os.path.join(datadir, 'details'), exist_ok=True)
-os.makedirs(os.path.join(datadir, 'fulltext'), exist_ok=True)
-os.makedirs(os.path.join(datadir, 'images'), exist_ok=True)
+os.makedirs(DATADIR, exist_ok=True)
+os.makedirs(os.path.join(DATADIR, 'details'), exist_ok=True)
+os.makedirs(os.path.join(DATADIR, 'fulltext'), exist_ok=True)
+os.makedirs(os.path.join(DATADIR, 'images'), exist_ok=True)
 init_db()
-for c in collections:
+for c in COLLECTIONS:
     get_collection(c)
 
