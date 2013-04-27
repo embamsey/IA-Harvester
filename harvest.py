@@ -56,7 +56,13 @@ def get_fulltext(did, ocr):
                 out.write(contents)
 
     # Repair hyphenation at column boundaries
-    contents = re.sub(r'-\s*$\n', '', contents.decode('utf-8'), flags=re.MULTILINE)
+    try:
+        contents = contents.decode('utf-8')
+        contents = re.sub(r'-\s*$\n', '', contents, flags=re.MULTILINE)
+    except Exception as exc:
+        print("WARN: Failed to decode full-text of %s as UTF8: %s" % (did, exc))
+        contents = str(contents)
+
     return contents
 
 def get_metadata(docid):
