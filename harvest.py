@@ -12,27 +12,6 @@ is to retrieve the metadata, thumbnail, and OCRed text to build a
 collection-specific web app. This script currently uses this data to populate
 a table named "items" in a PostgreSQL database. The table is set up to support
 full-text search, and stores the thumbnails in a subdirectory.
-
-To-do:
-  * build the web app
-  * improve tolerance for IA download / connection errors
-  * learn to do iterative crawls to pick up metadata corrections / new items
-
-Copyright (C) 2013, Laurentian University
-Author: Dan Scott <dscott@laurentian.ca>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import datetime
@@ -46,7 +25,7 @@ import urllib.parse
 import urllib.request
 
 DATADIR = './data'
-COLLECTIONS = ['laurentianuniversitylambda']
+COLLECTIONS = ['laurentianuniversitylambda', 'laurentianuniversitylorignaldechainereaction']
 DB_NAME = 'newspappy'
 DB_HOST = 'localhost'
 DB_USER = 'denials'
@@ -223,11 +202,12 @@ def get_page(collection, page, rows):
         load_db(collection, metadata)
     return res
 
-os.makedirs(DATADIR, exist_ok=True)
-os.makedirs(os.path.join(DATADIR, 'details'), exist_ok=True)
-os.makedirs(os.path.join(DATADIR, 'fulltext'), exist_ok=True)
-os.makedirs(os.path.join(DATADIR, 'images'), exist_ok=True)
-init_db()
-for c in COLLECTIONS:
-    get_collection(c)
+if __name__ == "__main__":
+    os.makedirs(DATADIR, exist_ok=True)
+    os.makedirs(os.path.join(DATADIR, 'details'), exist_ok=True)
+    os.makedirs(os.path.join(DATADIR, 'fulltext'), exist_ok=True)
+    os.makedirs(os.path.join(DATADIR, 'images'), exist_ok=True)
+    init_db()
+    for c in COLLECTIONS:
+        get_collection(c)
 
