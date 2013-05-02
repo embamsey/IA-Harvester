@@ -1,0 +1,8 @@
+{% extends "index.html" %}
+{% block title %} - Search Results{% endblock %}
+{% block content %}
+{{ super() }}
+{% for result in results %}
+    <div class="result"><span class="resid">{{ result[0] }}</span><span class="ressnip">{{ result[1] }}</span></div>
+{% endfor %}
+{% endblock %}
