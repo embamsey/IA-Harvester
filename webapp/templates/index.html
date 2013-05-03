@@ -2,17 +2,23 @@
 {% block title %} - Welcome{% endblock %}
 {% block content %}
 {% block heading %}<h1>Laurentian Student Newspapers{{ self.title }}</h1>{% endblock %}
-<form method="get" action="/search">
+<form method="get" action="/search" id="search-terms">
     <div>
         <label>Search terms:
-            <input name="query" type="search" placeholder="Input search terms here"></input>
+            <input name="query" type="search" 
+                {% if terms is defined %}
+                    value="{{ terms }}"
+                {% else %}
+                    placeholder="Input search terms here"
+                {% endif %}
+            autofocus />
         </label>
     </div>
     <div>
         <label>Limit to year (optional):
-            <input name="year" type="number" min="1960" max="2013" step="1">
+            <input name="year" type="number" min="1960" max="2013" step="1" />
         </label>
     </div>
-    <div><input type="submit"></div>
+    <div><input type="submit" /></div>
 </form>
 {% endblock %}
