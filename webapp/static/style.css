@@ -5,10 +5,13 @@ h1 {
     vertical-align: top;
 }
 form#search-terms {
-    font-size: 150%;
     display: inline-block;
-    width: 400px;
+    width: 500px;
     vertical-align: top;
+}
+
+form#search-terms label, form#search-terms input {
+    font-size: 1.5em;
 }
 form#search-terms div {
     display: inline-block;
