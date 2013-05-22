@@ -7,16 +7,19 @@ requests.
 Ultimately needs to support advanced search as well, including NOT operators
 and wildcards.
 """
+
+import config
 import json
 import psycopg2
 import flask
+
 app = flask.Flask(__name__)
 
-DB_NAME = 'newspappy'
-DB_HOST = 'localhost'
-DB_USER = 'denials'
-
-DB = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER)
+DB = psycopg2.connect(
+    host=config.DB_HOST,
+    database=config.DB_NAME,
+    user=config.DB_USER
+)
 
 @app.route("/search/<query>/")
 @app.route("/search/<query>/<int:limit>")
@@ -53,4 +56,4 @@ def search(query, limit=10, page=0):
 
 if __name__ == "__main__":
     app.debug = True
-    app.run(port=6000)
+    app.run(port=config.PORT)
