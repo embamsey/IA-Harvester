@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %} - Welcome{% endblock %}
+{% block content %}
+<div id="header">
+    <div class="logo">
+        <img src="/static/images/PNG/lul_logo_small.png" />
+    </div>
+    <div class="langswitch">
+        <ul class="language-switcher">
+            <li class="en">
+                <a class="en" href="/">English</a>
+            </li>
+            <li class="fr">
+                <a class="fr" href="/fr/">Français</a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div>
+<h1>Laurentian Student Newspapers{{ self.title }}</h1>
+</div>
+<form method="get" action="/search" id="search-terms">
+    <div>
+        <label for="query">Search terms</label>
+        <input id="query" name="query" type="search" 
+            {% if terms is defined %}
+                value="{{ terms }}"
+            {% else %}
+                placeholder="Input search terms here"
+            {% endif %}
+        autofocus />
+    </div>
+    <div>
+        <label for="year">Limit to year (optional)</label>
+        <input id="year" name="year" type="number" min="1960" max="2013" step="1" />
+    </div>
+    <div><input type="submit" /></div>
+</form>
+{% endblock %}

@@ -1,0 +1,13 @@
+What's this "newspappy" thing?
+==============================
+
+newspappy offers a customized full-text search engine for one or more Internet
+Archive collections. The application harvests OCRed full-text from the
+collections, then creates a full-text search index. The index results then
+link back to the Internet Archive reader interface.
+
+* harvest.py: given a list of collections to harvest, collect all of the
+  item identifiers for each collection, then collect the relevant metadata,
+  derived full-text, and thumbnail images for each item
+
+
