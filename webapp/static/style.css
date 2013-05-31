@@ -60,10 +60,11 @@ div.result {
     padding-top: 10px;
 }
 .content {
-    width: 80%;
+    width: 70%;
     text-align: center;
     float: right;
     background: #fff;
+    margin-top: 3px;
 }
 a:hover {
     color: #ffc423;
@@ -78,15 +79,15 @@ a.restitle {
     color: #1D2A54;
 }
 .facet {
-    padding-left: 20px;
-    width: 20%; 
+    padding: 10px; 
     background: #fff;
-    height: 100%;
+    width: 28%;
+    margin-top: 34px;
 }
-li.eng {
+.en {
     display: inline;
 }
-li.fr {
+.fr {
     display: inline;
 }
 ul.language-switcher {
@@ -108,9 +109,6 @@ ul.language-switcher {
     display: inline;
     width: 100%;
 }
-li {
-    display: inline;
-}
 a.en.active {
     display: none;
 }
@@ -119,4 +117,13 @@ a.en, a.fr {
 }
 a.en:hover, a.fr:hover {
     color: #ffc423;
+}
+li {
+    display: list-item;
+    list-style: none;
+}
+.year, .coll {
+    border: thin black solid;
+    border-radius: 10px;
+    padding-left: 5px;
 }

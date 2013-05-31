@@ -35,8 +35,17 @@
 {% endfor %}
 </div>
 <div class="facet">
+    <div class="year">
     <h4>Search by Year</h4>
+    {% for year in years %}
+        <li>{{ year[0] }} : {{ year[1] }}</li>
+    {% endfor %}
+    </div>
+    <div class="coll">
     <h4>Search by Collection</h4>
-    
+    {% for coll in collections %}
+        <li>{{ coll[0] }} : {{ coll[1] }}</li>
+    {% endfor %}
+    </div>    
 </div>
 {% endblock %}
