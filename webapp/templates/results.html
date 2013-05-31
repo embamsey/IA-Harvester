@@ -2,10 +2,11 @@
 {% block title %} - Search Results{% endblock %}
 {% block content %}
 {{ super() }}
+<div class="content">
 {% for result in results %}
     <div class="result">
-        <h3 class="restitle">
-            <a href="http://archive.org/details/{{ result['id'] }}">{{ result['title'] }}
+        <h3 class="restitle"><a class="restitle" href="http://archive.org/details/{{ result['id'] }}">
+           {{ result['title'] }}
         {% if result['date'] != '1900-01-01' %}
             <span class="resdate">({{ result['date'] }})</span>
         {% else %}
@@ -14,21 +15,28 @@
             {% endif %}
         {% endif %}</a>
         </h3>
-        <div class="result-hdr">
+        <div class="snippets">
+    {% for snippet in result['snippets'] %}
+            <div class="ressnip">... {{ snippet }} ...</div>
+    {% endfor %}
+            <a href="#" class="more">Show more matches in this issue</a>
+        </div>
+         <div class="result-hdr">
     {% if result['collection'] == 'laurentianuniversitylambda' %}
             <div class="rescoll">Lambda</div>
     {% else %}
             <div class="rescoll"></div>
     {% endif %}
         </div>
-        <div class="snippets">
-    {% for snippet in result['snippets'] %}
-            <div class="ressnip">... {{ snippet }} ...</div>
-    {% endfor %}
-        </div>
         <div class="thumb">
-            <img src="/static/images/{{ result['id'] }}.gif" />
+            <img src="/static/images/PNG/{{ result['id'] }}-0.png" />
         </div>
     </div>
 {% endfor %}
+</div>
+<div class="facet">
+    <h4>Search by Year</h4>
+    <h4>Search by Collection</h4>
+    
+</div>
 {% endblock %}

@@ -8,4 +8,4 @@ PORT = 8001
 # Database connection info
 DB_NAME = 'newspappy'
 DB_HOST = 'localhost'
-DB_USER = 'denials'
+DB_USER = 'postgres'

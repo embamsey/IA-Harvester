@@ -1,7 +1,24 @@
 {% extends "base.html" %}
 {% block title %} - Welcome{% endblock %}
 {% block content %}
-{% block heading %}<h1>Laurentian Student Newspapers{{ self.title }}</h1>{% endblock %}
+<div id="header">
+    <div class="logo">
+        <img src="/static/images/PNG/lul_logo_small.png" />
+    </div>
+    <div class="langswitch">
+        <ul class="language-switcher">
+            <li class="en">
+                <a class="en" href="/">English</a>
+            </li>
+            <li class="fr">
+                <a class="fr" href="/fr/">Français</a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div>
+<h1>Laurentian Student Newspapers{{ self.title }}</h1>
+</div>
 <form method="get" action="/search" id="search-terms">
     <div>
         <label for="query">Search terms</label>
