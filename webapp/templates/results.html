@@ -3,6 +3,41 @@
 {% block content %}
 {{ super() }}
 {% for result in results %}
+<script>
+function show_more(elem) {
+    var children = elem.parentNode.parentNode.childNodes;
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child.tagName == 'DIV') {
+            child.className = 'ressnip';
+        } else if (child.tagName == 'P') {
+            var kids = child.childNodes;
+            for (var j = 0; j < kids.length; j++) {
+                var kid = kids[j];
+                kid.setAttribute('onclick', 'show_less(this);');
+                kid.childNodes[0].nodeValue = 'Hide snippets';
+            }
+        }
+    }
+}
+function show_less(elem) {
+    var children = elem.parentNode.parentNode.childNodes;
+    var found = false;
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child.tagName == 'DIV') {
+            /* Only hide the second and subsequent nodes */
+            if (found) {
+                child.className = 'ressnip hidden';
+            }
+            found = true;
+        } else if (child.tagName == 'P') {
+            child.childNodes[0].setAttribute('onclick', 'show_more(this);');
+            child.childNodes[0].childNodes[0].nodeValue = 'Show more snippets';
+        }
+    }
+}
+</script>
     <div class="result">
         <h3 class="restitle">
             <a href="http://archive.org/details/{{ result['id'] }}">{{ result['title'] }}
@@ -23,7 +58,14 @@
         </div>
         <div class="snippets">
     {% for snippet in result['snippets'] %}
+        {% if loop.first %}
             <div class="ressnip">... {{ snippet }} ...</div>
+        {% else %}
+            <div class="ressnip hidden">... {{ snippet }} ...</div>
+        {% endif %}
+        {% if loop.last %}
+            <p class="show_hide"><a onclick="show_more(this);">Show more snippets</a></p>
+        {% endif %}
     {% endfor %}
         </div>
         <div class="thumb">

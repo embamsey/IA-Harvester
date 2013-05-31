@@ -20,6 +20,9 @@ form#search-terms div {
 h3.restitle {
     margin-bottom: 0px;
 }
+h3.restitle a {
+    text-decoration: none;
+}
 .thumb {
     display: inline-block;
     width: 110px;
@@ -36,7 +39,20 @@ h3.restitle {
 }
 .ressnip {
     max-width: 400px;
-    border: thin black solid;
     border-radius: 10px;
     padding: 1em;
+    border: thin black solid;
+}
+.ressnip {
+    border-width: thin thin thick thin;
+    border-style: solid solid double solid;
+}
+.hidden {
+    display: none;
+}
+p.show_hide {
+    text-align: center;
+    color: rgb(0, 0, 238);
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
