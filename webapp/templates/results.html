@@ -15,7 +15,7 @@ function show_more(elem) {
             for (var j = 0; j < kids.length; j++) {
                 var kid = kids[j];
                 kid.setAttribute('onclick', 'show_less(this);');
-                kid.childNodes[0].nodeValue = 'Hide snippets';
+                kid.childNodes[0].nodeValue = ' - ';
             }
         }
     }
@@ -33,7 +33,7 @@ function show_less(elem) {
             found = true;
         } else if (child.tagName == 'P') {
             child.childNodes[0].setAttribute('onclick', 'show_more(this);');
-            child.childNodes[0].childNodes[0].nodeValue = 'Show more snippets';
+            child.childNodes[0].childNodes[0].nodeValue = ' + ';
         }
     }
 }
@@ -64,7 +64,7 @@ function show_less(elem) {
             <div class="ressnip hidden">... {{ snippet }} ...</div>
         {% endif %}
         {% if loop.last %}
-            <p class="show_hide"><a onclick="show_more(this);">Show more snippets</a></p>
+            <p class="show_hide"><a onclick="show_more(this);"> + </a></p>
         {% endif %}
     {% endfor %}
         </div>

@@ -52,7 +52,17 @@ h3.restitle a {
 }
 p.show_hide {
     text-align: center;
-    color: rgb(0, 0, 238);
-    margin-top: 0.5em;
+    margin-top: 0em;
     margin-bottom: 0.5em;
+}
+p.show_hide a {
+    color: rgb(0, 0, 238);
+    border-top: none;
+    border-left: thin solid black;
+    border-right: thin solid black;
+    border-bottom: thin solid black;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-left: 1em;
+    padding-right: 1em;
 }
