@@ -27,7 +27,8 @@ DB = psycopg2.connect(
 def search(query, limit=10, page=0):
     """Return JSON formatted search results, including snippets and facets"""
 
-    results = __get_ranked_results(query, limit, page)
+    year = flask.request.args.get('year')
+    results = __get_ranked_results(query, year, limit, page)
     years = __get_year_facet(query)
     collections = __get_collection_facet(query)
 
@@ -40,14 +41,21 @@ def search(query, limit=10, page=0):
     response = flask.Response(response="%s" % resj, mimetype='application/json')
     return response
 
-def __get_ranked_results(query, limit, page):
+def __get_ranked_results(query, year, limit, page):
     """Simple search for terms, with optional limit and paging"""
 
     sql = """
         WITH q AS (SELECT plainto_tsquery(%s) AS query),
         ranked AS (
             SELECT id, collection, title, date, year, ocr, ts_rank(tsv, query) AS rank
-            FROM items, q WHERE q.query @@ tsv
+            FROM items, q
+            WHERE q.query @@ tsv
+        """
+    if year:
+        sql = sql + """
+                AND year = %s
+    """
+    sql = sql + """
             ORDER BY rank DESC
             LIMIT %s OFFSET %s
         )
@@ -57,7 +65,10 @@ def __get_ranked_results(query, limit, page):
     """
 
     cur = DB.cursor()
-    cur.execute(sql, (query, limit, page*limit))
+    if year:
+        cur.execute(sql, (query, year, limit, page*limit))
+    else:
+        cur.execute(sql, (query, limit, page*limit))
     results = []
     for row in cur:
         results.append({

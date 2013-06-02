@@ -28,6 +28,8 @@ def search():
     query = flask.request.args.get('query', '')
     year = flask.request.args.get('year', '')
     jsonu = "%s/search/%s/" % (config.JSON_HOST, urllib.quote_plus(query))
+    if year:
+        jsonu = "%s?year=%d" % (jsonu, int(year))
     res = json.loads(urllib2.urlopen(jsonu).read())
     template = env.get_template('results.html')
     return(template.render(
