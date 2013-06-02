@@ -1,4 +1,28 @@
 {% extends "index.html" %}
+{% macro makeurl(query, page=0, limit=10, year, collection) %}
+{%     set url = request.base_url ~ "?query=" ~ terms %}
+{% if page != 0 %}
+{%     set url = url ~ "&amp;page=" ~ page %}
+{% endif %}
+{% if limit and limit != 10 %}
+{%     set url = url ~ "&amp;limit=" ~ limit %}
+{% endif %}
+{% if year %}
+{%     set url = url ~ "&amp;year=" ~ year %}
+{% elif year == '' %}
+{# We wanted to remove the year filter #}
+{% elif request.args.get('year') %}
+{%     set url = url ~ "&amp;year=" ~ request.args.get('year') %}
+{% endif %}
+{% if collection %}
+{%     set url = url ~ "&amp;collection=" ~ collection %}
+{% elif collection == '' %}
+{# We wanted to remove the collection filter #}
+{% elif request.args.get('collection') %}
+{%     set url = url ~ "&amp;collection=" ~ request.args.get('collection') %}
+{% endif %}
+{{ url }}
+{% endmacro %}
 {% block title %} - Search Results{% endblock %}
 {% block content %}
 {{ super() }}
@@ -38,6 +62,28 @@ function show_less(elem) {
     }
 }
 </script>
+<section id="metadata">
+{% if results.meta.page == 0 and results.meta.total > results.meta.limit %}
+<p>Showing 1 - {{ results.meta.limit }} of about {{ results.meta.total }} results
+{% elif results.meta.page == 0 %}
+<p>Showing 1 - {{ results.meta.total }} of about {{ results.meta.total }} results
+{% elif (results.meta.page + 1) * results.meta.limit > results.meta.total %}
+<p>Showing {{ (results.meta.page * results.meta.limit) + 1 }} - {{
+   results.meta.total }}
+   of about {{ results.meta.total }} results
+{% else %}
+<p>Showing {{ (results.meta.page * results.meta.limit) + 1 }} - {{
+   (results.meta.page + 1) * results.meta.limit }}
+   of about {{ results.meta.total }} results
+{% endif %}
+{% if results.meta.page > 0 %}
+    <a href="{{ makeurl(page=(results.meta.page - 1)) }}">Previous</a>
+{% endif %}
+{% if ((results.meta.page + 1) * results.meta.limit) < results.meta.total %}
+    <a href="{{ makeurl(page=(results.meta.page + 1)) }}">Next</a>
+{% endif %}
+</p>
+</section>
 <div>
 <section id="results">
 {% for result in results['results'] %}
@@ -82,11 +128,11 @@ function show_less(elem) {
 <h3>Years</h3>
 <ul>
 {% if request.args.get('year') %}
-    <li><a href="{{ request.base_url ~ '?query=' ~ terms }}"><span class="year">{{ request.args.get('year') }}</span></a> <strong>(X)</strong></li>
+    <li><a href="{{ makeurl(year='') }}"><span class="year">{{ request.args.get('year') }}</span></a> <strong>(X)</strong></li>
 {% else %}
     {% for year in results['years'] %}
         {% if loop.index <= 10 %}
-    <li><a href="{{ request.base_url ~ '?query=' ~ terms ~ '&amp;year=' ~ year[0] }}"><span class="year">{{ year[0] }}</span> <span>({{year[1]}})</span></a></li>
+    <li><a href="{{ makeurl(year=year[0]) }}"><span class="year">{{ year[0] }}</span> <span>({{year[1]}})</span></a></li>
         {% endif %}
     {% endfor %}
 {% endif %}

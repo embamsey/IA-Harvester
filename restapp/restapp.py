@@ -22,8 +22,8 @@ DB = psycopg2.connect(
 )
 
 @app.route("/search/<query>/")
-@app.route("/search/<query>/<int:limit>")
-@app.route("/search/<query>/<int:limit>/<int:page>")
+@app.route("/search/<query>/<int:page>")
+@app.route("/search/<query>/<int:page>/<int:limit>")
 def search(query, limit=10, page=0):
     """Return JSON formatted search results, including snippets and facets"""
 
@@ -31,12 +31,19 @@ def search(query, limit=10, page=0):
     results = __get_ranked_results(query, year, limit, page)
     years = __get_year_facet(query)
     collections = __get_collection_facet(query)
+    count = __get_result_count(query, year)
 
     resj = json.dumps({
         'query': query,
         'results': results,
         'years': years,
-        'collections': collections
+        'collections': collections,
+        'meta': {
+            'total': count,
+            'page': page,
+            'limit': limit,
+            'results': len(results)
+        }
     })
     response = flask.Response(response="%s" % resj, mimetype='application/json')
     return response
@@ -52,9 +59,7 @@ def __get_ranked_results(query, year, limit, page):
             WHERE q.query @@ tsv
         """
     if year:
-        sql = sql + """
-                AND year = %s
-    """
+        sql = sql + "AND year = %s"
     sql = sql + """
             ORDER BY rank DESC
             LIMIT %s OFFSET %s
@@ -124,6 +129,28 @@ def __get_collection_facet(query):
         ])
 
     return collections
+
+def __get_result_count(query, year):
+    """Gather count of matching results"""
+
+    cur = DB.cursor()
+    sql = """
+        SELECT COUNT(*) AS rescnt
+        FROM items
+        WHERE plainto_tsquery(%s) @@ tsv
+    """
+
+    if year:
+        sql = sql + "AND year = %s"
+        cur.execute(sql, (query, year))
+    else:
+        cur.execute(sql, (query,))
+
+    count = 0
+    for row in cur:
+        count = row[0]
+
+    return count 
 
 if __name__ == "__main__":
     app.debug = True
