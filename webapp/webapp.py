@@ -30,7 +30,11 @@ def search():
     jsonu = "%s/search/%s/" % (config.JSON_HOST, urllib.quote_plus(query))
     res = json.loads(urllib2.urlopen(jsonu).read())
     template = env.get_template('results.html')
-    return(template.render(terms=res['query'].replace('+', ' '), results=res['results']))
+    return(template.render(
+        terms=res['query'].replace('+', ' '),
+        results=res,
+        request=flask.request
+    ))
 
 if __name__ == "__main__":
     app.debug = True

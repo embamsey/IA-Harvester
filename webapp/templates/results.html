@@ -2,10 +2,11 @@
 {% block title %} - Search Results{% endblock %}
 {% block content %}
 {{ super() }}
-{% for result in results %}
+{% for result in results['results'] %}
 <script>
 function show_more(elem) {
     var children = elem.parentNode.parentNode.childNodes;
+    /* Display all child snippets */
     for (var i = 0; i < children.length; i++) {
         var child = children[i];
         if (child.tagName == 'DIV') {
@@ -73,4 +74,26 @@ function show_less(elem) {
         </div>
     </div>
 {% endfor %}
+<section id="year_facet"><h4>Years</h4>
+<ul>
+{% if request.args.get('year') %}
+    <li><a href="{{ request.base_url ~ '?query=' ~ terms }}"><span class="year">{{ request.args.get('year') }}</span></a> <strong>(X)</strong></li>
+{% else %}
+    {% for year in results['years'] %}
+        {% if loop.index <= 10 %}
+    <li><a href="{{ request.base_url ~ '?query=' ~ terms ~ '&amp;year=' ~ year[0] }}"><span class="year">{{ year[0] }}</span> <span>({{year[1]}})</span></a></li>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+</ul>
+</section>
+<section id="collection_facet"><h4>Collections</h4>
+<ul>
+{% for col in results['collections'] %}
+    {% if loop.index <= 10 %}
+    <li><span class="collection">{{ col[0] }}</span> <span>({{col[1]}})</span></li>
+    {% endif %}
+{% endfor %}
+</ul>
+</section>
 {% endblock %}
