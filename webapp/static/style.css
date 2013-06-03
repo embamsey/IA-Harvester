@@ -34,6 +34,9 @@ h3.restitle {
     position: relative;
     color: #1D2A54;
 }
+h3.restitle a {
+    text-decoration: none;
+}
 .thumb {
     display: inline-block;
     width: 110px;
@@ -48,23 +51,12 @@ h3.restitle {
     display: inline-block;
     vertical-align: top;
 }
-.ressnip {
-    max-width: 400px;
-    border: thin black solid;
-    border-radius: 10px;
-    padding: 1em;
-    background: #dfeffc;
-}
 div.result {
     text-align: center;
     padding-top: 10px;
 }
 .content {
-    width: 70%;
-    text-align: center;
-    float: right;
     background: #fff;
-    margin-top: 3px;
 }
 a:hover {
     color: #ffc423;
@@ -126,4 +118,34 @@ li {
     border: thin black solid;
     border-radius: 10px;
     padding-left: 5px;
+    border: thin black solid;
+}
+.ressnip {
+    max-width: 400px;
+    border-width: thin thin thick thin;
+    border-style: solid solid double solid;
+    border-radius: 10px;
+    background: #dfeffc;
+}
+.hidden {
+    display: none;
+}
+p.show_hide {
+    text-align: center;
+    margin-top: 0em;
+    margin-bottom: 0.5em;
+}
+p.show_hide a {
+    color: rgb(0, 0, 238);
+    border-top: none;
+    border-left: thin solid black;
+    border-right: thin solid black;
+    border-bottom: thin solid black;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+#metadata {
+    background: #fff;
 }

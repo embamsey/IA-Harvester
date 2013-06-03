@@ -1,12 +1,95 @@
 {% extends "index.html" %}
+{% macro makeurl(query, page=0, limit=10, year, collection) %}
+{%     set url = request.base_url ~ "?query=" ~ terms %}
+{% if page != 0 %}
+{%     set url = url ~ "&amp;page=" ~ page %}
+{% endif %}
+{% if limit and limit != 10 %}
+{%     set url = url ~ "&amp;limit=" ~ limit %}
+{% endif %}
+{% if year %}
+{%     set url = url ~ "&amp;year=" ~ year %}
+{% elif year == '' %}
+{# We wanted to remove the year filter #}
+{% elif request.args.get('year') %}
+{%     set url = url ~ "&amp;year=" ~ request.args.get('year') %}
+{% endif %}
+{% if collection %}
+{%     set url = url ~ "&amp;collection=" ~ collection %}
+{% elif collection == '' %}
+{# We wanted to remove the collection filter #}
+{% elif request.args.get('collection') %}
+{%     set url = url ~ "&amp;collection=" ~ request.args.get('collection') %}
+{% endif %}
+{{ url }}
+{% endmacro %}
 {% block title %} - Search Results{% endblock %}
 {% block content %}
 {{ super() }}
+<script>
+function show_more(elem) {
+    var children = elem.parentNode.parentNode.childNodes;
+    /* Display all child snippets */
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child.tagName == 'DIV') {
+            child.className = 'ressnip';
+        } else if (child.tagName == 'P') {
+            var kids = child.childNodes;
+            for (var j = 0; j < kids.length; j++) {
+                var kid = kids[j];
+                kid.setAttribute('onclick', 'show_less(this);');
+                kid.childNodes[0].nodeValue = ' - ';
+            }
+        }
+    }
+}
+function show_less(elem) {
+    var children = elem.parentNode.parentNode.childNodes;
+    var found = false;
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child.tagName == 'DIV') {
+            /* Only hide the second and subsequent nodes */
+            if (found) {
+                child.className = 'ressnip hidden';
+            }
+            found = true;
+        } else if (child.tagName == 'P') {
+            child.childNodes[0].setAttribute('onclick', 'show_more(this);');
+            child.childNodes[0].childNodes[0].nodeValue = ' + ';
+        }
+    }
+}
+</script>
+<section id="metadata">
+{% if results.meta.page == 0 and results.meta.total > results.meta.limit %}
+<p>Showing 1 - {{ results.meta.limit }} of about {{ results.meta.total }} results
+{% elif results.meta.page == 0 %}
+<p>Showing 1 - {{ results.meta.total }} of about {{ results.meta.total }} results
+{% elif (results.meta.page + 1) * results.meta.limit > results.meta.total %}
+<p>Showing {{ (results.meta.page * results.meta.limit) + 1 }} - {{
+   results.meta.total }}
+   of about {{ results.meta.total }} results
+{% else %}
+<p>Showing {{ (results.meta.page * results.meta.limit) + 1 }} - {{
+   (results.meta.page + 1) * results.meta.limit }}
+   of about {{ results.meta.total }} results
+{% endif %}
+{% if results.meta.page > 0 %}
+    <a href="{{ makeurl(page=(results.meta.page - 1)) }}">Previous</a>
+{% endif %}
+{% if ((results.meta.page + 1) * results.meta.limit) < results.meta.total %}
+    <a href="{{ makeurl(page=(results.meta.page + 1)) }}">Next</a>
+{% endif %}
+</p>
+</section>
 <div class="content">
-{% for result in results %}
+<section id="results">
+{% for result in results['results'] %}
     <div class="result">
-        <h3 class="restitle"><a class="restitle" href="http://archive.org/details/{{ result['id'] }}">
-           {{ result['title'] }}
+        <h3 class="restitle">
+            <a href="http://archive.org/details/{{ result['id'] }}">{{ result['title'] }}
         {% if result['date'] != '1900-01-01' %}
             <span class="resdate">({{ result['date'] }})</span>
         {% else %}
@@ -15,37 +98,56 @@
             {% endif %}
         {% endif %}</a>
         </h3>
-        <div class="snippets">
-    {% for snippet in result['snippets'] %}
-            <div class="ressnip">... {{ snippet }} ...</div>
-    {% endfor %}
-            <a href="#" class="more">Show more matches in this issue</a>
-        </div>
-         <div class="result-hdr">
+        <div class="result-hdr">
     {% if result['collection'] == 'laurentianuniversitylambda' %}
             <div class="rescoll">Lambda</div>
     {% else %}
             <div class="rescoll"></div>
     {% endif %}
         </div>
+        <div class="snippets">
+    {% for snippet in result['snippets'] %}
+        {% if loop.first %}
+            <div class="ressnip">... {{ snippet }} ...</div>
+        {% else %}
+            <div class="ressnip hidden">... {{ snippet }} ...</div>
+        {% endif %}
+        {% if loop.last and not loop.first %}
+            <p class="show_hide"><a onclick="show_more(this);"> + </a></p>
+        {% endif %}
+    {% endfor %}
+        </div>
         <div class="thumb">
             <img src="/static/images/PNG/{{ result['id'] }}-0.png" />
         </div>
     </div>
 {% endfor %}
-</div>
-<div class="facet">
-    <div class="year">
-    <h4>Search by Year</h4>
-    {% for year in years %}
-        <li>{{ year[0] }} : {{ year[1] }}</li>
+</section>
+<section id="facets">
+<section id="year_facet">
+<h3>Years</h3>
+<ul>
+{% if request.args.get('year') %}
+    <li><a href="{{ makeurl(year='') }}"><span class="year">{{ request.args.get('year') }}</span></a> <strong>(X)</strong></li>
+{% else %}
+    {% for year in results['years'] %}
+        {% if loop.index <= 10 %}
+    <li><a href="{{ makeurl(year=year[0]) }}"><span class="year">{{ year[0] }}</span> <span>({{year[1]}})</span></a></li>
+        {% endif %}
     {% endfor %}
-    </div>
-    <div class="coll">
-    <h4>Search by Collection</h4>
-    {% for coll in collections %}
-        <li>{{ coll[0] }} : {{ coll[1] }}</li>
-    {% endfor %}
-    </div>    
+{% endif %}
+</ul>
+</section>
+<section id="collection_facet">
+<h3>Collections</h3>
+<ul>
+{% for col in results['collections'] %}
+    {% if loop.index <= 10 %}
+    <li><span class="collection">{{ col[0] }}</span> <span>({{col[1]}})</span></li>
+    {% endif %}
+{% endfor %}
+</ul>
+</section>
+</section>
 </div>
 {% endblock %}

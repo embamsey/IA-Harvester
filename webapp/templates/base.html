@@ -5,27 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {% block head %}
     <title> Laurentian Student Newspapers {% block title %}{% endblock %}</title>
+    <link href="http://fonts.googleapis.com/css?family=Merriweather+Sans" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-    <script type="text/javascript">
-	$(document).ready(function(){
-	$(".snippets").each(function() {
-	$('div.ressnip', this).hide(); //hide all div's
-	$('div.ressnip:first', this).show(); //show only first div in each set of snippets
-	$('.more',this).show(); //show more link below each div
-	});
-
-	$('.more').toggle( 
-	    function() { 
-	    $(this).prevAll().show(); // toggle on to show all divs
-	    $(this).html('Show Less'); //change legend to - less - for this id=more when div is expanded
-	    }, 
-	    function() {
-	    $(this).prevAll().not('div.ressnip:last,h3').hide(); //hide all div's except first div, counts backwards in prevAll and reshow header h3 as it was hidden with prevAll
-	    $(this).html('Show more matches in this issue'); //change legend to - more - for this id=more when div is collapsed
-	    });
-	});
-</script>
     {% endblock %}
 </head>
 <body>
