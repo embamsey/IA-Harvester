@@ -142,10 +142,21 @@ function show_less(elem) {
 <h3>Collections</h3>
 <ul>
 {% for col in results['collections'] %}
-    {% if loop.index <= 10 %}
-    <li><span class="collection">{{ col[0] }}</span> <span>({{col[1]}})</span></li>
+    {% if loop.index <=10 %}
+    <li> <span class="collection">{{ col[0] }}</span> <span>({{col[1]}})</span></li>
     {% endif %}
 {% endfor %}
+<!--
+{% if request.args.get('collection') %}
+    <li><a href="{{ makeurl(collection='') }}"><span class="coll">{{ request.args.get('collection') }}</span></a> <strong>(X)</strong></li>
+{% else %}
+    {% for col in results['collections'] %}
+        {% if loop.index <= 10 %}
+    <li><a href="{{makeurl(collection=col[0]) }}"<span class="collection">{{ col[0] }}</span> <span>({{col[1]}})</span></a></li>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+-->
 </ul>
 </section>
 </section>

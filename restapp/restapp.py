@@ -28,6 +28,8 @@ def search(query, limit=10, page=0):
     """Return JSON formatted search results, including snippets and facets"""
 
     year = flask.request.args.get('year')
+    """collection = flask.request.args.get('collection')
+    results = __get_ranked_results(query, year, collection, limit, page)"""
     results = __get_ranked_results(query, year, limit, page)
     years = __get_year_facet(query)
     collections = __get_collection_facet(query)
@@ -60,6 +62,8 @@ def __get_ranked_results(query, year, limit, page):
         """
     if year:
         sql = sql + "AND year = %s"
+    """if collection:
+        sql = sql + "AND collection = %s"""
     sql = sql + """
             ORDER BY rank DESC
             LIMIT %s OFFSET %s
