@@ -28,12 +28,12 @@ def search(query, limit=10, page=0):
     """Return JSON formatted search results, including snippets and facets"""
 
     year = flask.request.args.get('year')
-    """collection = flask.request.args.get('collection')
-    results = __get_ranked_results(query, year, collection, limit, page)"""
-    results = __get_ranked_results(query, year, limit, page)
+    collection = flask.request.args.get('collection')
+    results = __get_ranked_results(query, year, collection, limit, page)
+    """results = __get_ranked_results(query, year, limit, page)"""
     years = __get_year_facet(query)
     collections = __get_collection_facet(query)
-    count = __get_result_count(query, year)
+    count = __get_result_count(query, year, collection)
 
     resj = json.dumps({
         'query': query,
@@ -50,7 +50,7 @@ def search(query, limit=10, page=0):
     response = flask.Response(response="%s" % resj, mimetype='application/json')
     return response
 
-def __get_ranked_results(query, year, limit, page):
+def __get_ranked_results(query, year, collection, limit, page):
     """Simple search for terms, with optional limit and paging"""
 
     sql = """
@@ -62,8 +62,8 @@ def __get_ranked_results(query, year, limit, page):
         """
     if year:
         sql = sql + "AND year = %s"
-    """if collection:
-        sql = sql + "AND collection = %s"""
+    if collection:
+        sql = sql + "AND collection = %s"
     sql = sql + """
             ORDER BY rank DESC
             LIMIT %s OFFSET %s
@@ -76,6 +76,8 @@ def __get_ranked_results(query, year, limit, page):
     cur = DB.cursor()
     if year:
         cur.execute(sql, (query, year, limit, page*limit))
+    if collection:
+        cur.execute(sql, (query, collection, limit, page*limit))
     else:
         cur.execute(sql, (query, limit, page*limit))
     results = []
@@ -134,7 +136,7 @@ def __get_collection_facet(query):
 
     return collections
 
-def __get_result_count(query, year):
+def __get_result_count(query, year, collection):
     """Gather count of matching results"""
 
     cur = DB.cursor()
@@ -147,6 +149,9 @@ def __get_result_count(query, year):
     if year:
         sql = sql + "AND year = %s"
         cur.execute(sql, (query, year))
+    if collection:
+        sql = sql + "AND collection = %s"
+        cur.execute(sql, (query, collection))
     else:
         cur.execute(sql, (query,))
 

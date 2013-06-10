@@ -27,15 +27,15 @@ def search():
     """Simple search for terms, with optional limit and paging"""
     query = flask.request.args.get('query', '')
     year = flask.request.args.get('year', '')
-    """collection = flask.request.args.get('collection', '')"""
+    collection = flask.request.args.get('collection', '')
     page = flask.request.args.get('page', '')
     jsonu = "%s/search/%s/" % (config.JSON_HOST, urllib.quote_plus(query))
     if page:
         jsonu = "%s%d" % (jsonu, int(page))
+    if collection:
+        jsonu = "%s?collection=%s" % (jsonu, str(collection))
     if year:
         jsonu = "%s?year=%d" % (jsonu, int(year))
-    """if collection:
-        jsonu = "%s?collection=%s" % (jsonu, str(collection))"""
     res = json.loads(urllib2.urlopen(jsonu).read())
     template = env.get_template('results.html')
 
